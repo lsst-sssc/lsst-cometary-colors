@@ -1,14 +1,14 @@
 # photons/molecule at 1 au, units: 1/s
 # filter columns are throughputs
 # wave (AA) is approximate since these can be broad features
-molecule,band,gfactor,wave,reference,u,g,r,i,z,y
+molecule,band,wave,gfactor,reference,u,g,r,i,z,y
 
 # NH assuming delta-rh=0
 # Converted from 6e-14 erg/s/molecule, lambda=3358 AA
 NH,(0-0),1.0e-2,3358,Kim et al. (1989),1.0,0,0,0,0,0
 
 # CN... need to look at Schleicher's thesis
-# 4e-13 erg/s/molecule at 3870
+# Using 4e-13 erg/s/molecule at 3870
 CN,(Delta-nu=0),3870,7.8e-2,Schleicher (1983),1.0,1.0,0,0,0,0
 CN,(2-0),,nan,Fink (1994),0,0,0,1.0,0,0
 CN,(1-0),,nan,Fink (1994),0,0,0,0,1.0,1.0

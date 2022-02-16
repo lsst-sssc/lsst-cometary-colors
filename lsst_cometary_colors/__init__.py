@@ -84,22 +84,37 @@ class Gas(Coma):
                 row["gamma daughter"] * u.km * rh_scale,
             )
 
-        # key by filter, each item is a list of bands with throughput > 0
-        self.bands = defaultdict(list)
+        # key by molecule+band name, only save filters with throughput > 0
+        self.bands = {}
         for row in ascii.read("emission-bands.csv", delimiter=","):
-            for filt in "ugrizy":
-                if row[filt] > 0 and np.isfinite(row["gfactor"]):
-                    self.bands[filt].append(
-                        {
-                            "molecule": row["molecule"],
-                            "gfactor": row["gfactor"] / u.s * rh_scale,
-                            "wave": row["wave"] * u.AA,
-                            "throughput": row[filt],
-                            "reference": row["reference"],
-                        }
-                    )
+            if not np.isfinite(row["gfactor"]):
+                continue
+            k = f'{row["molecule"]} {row["band"]}'
+            self.bands[k] = {
+                "name": row["band"],
+                "molecule": row["molecule"],
+                "gfactor": row["gfactor"] / u.s * rh_scale,
+                "wave": row["wave"] * u.AA,
+                "throughput": {filt: row[filt] for filt in "ugrizy" if row[filt] > 0},
+                "reference": row["reference"],
+            }
 
-    def fluxd(self, filt, aper, molecule=None):
+    def bands_in_filter(self, filt, molecule=None, band_name=None):
+        """List of bands in a filter, optionally limited to a specific molecule or band."""
+        bands = []
+        for band in self.bands.values():
+            if molecule not in [None, band["molecule"]]:
+                continue
+
+            if band_name not in [None, band["name"]]:
+                continue
+
+            if filt in band["throughput"]:
+                bands.append(band)
+
+        return bands
+
+    def fluxd(self, filt, aper, molecule=None, band_name=None):
         """Calculate effective flux density in requested LSST filter.
 
 
@@ -114,20 +129,22 @@ class Gas(Coma):
         molecule : str, optional
             Limit calculations to just this molecule.
 
+        band_name : str, optional
+            Limit calculations to just this band.
+
         """
 
         fluxd_total = 0 * u.W / u.m**2 / u.um
         A = 4 * np.pi * self.eph["Delta"][0] ** 2
-        for band in self.bands[filt]:
+        for band in self.bands_in_filter(filt, molecule=molecule, band_name=band_name):
             haser = self.haser[band["molecule"]]
-            # if haser.Q <= 0 / u.s:
-            #   continue
             N = haser.total_number(aper)
             flux = (N * band["gfactor"] * const.h * const.c / band["wave"]).to("W")
             fluxd = (flux * band["wave"] / lambda_0[filt] / bandwidth[filt] / A).to(
                 "W/(m2 um)"
             )
-            fluxd_total = fluxd_total + fluxd
+
+            fluxd_total = fluxd_total + fluxd * band["throughput"][filt]
             logging.debug(
                 "%s %s %f %s %s %s",
                 filt,
@@ -271,3 +288,35 @@ class Comet:
         """Same as fluxd, but for magnitudes."""
 
         return self.fluxd(filt, aper).to(u.ABmag, u.spectral_density(lambda_eff[filt]))
+
+    def fraction(self, filt, aper):
+        """Same as fluxd, but for relative fraction.
+
+
+        Returns
+        -------
+        frac : dict
+            Relative fraction keyed by source (dust, gas, gas band, or
+            molecule).
+
+        """
+
+        frac = {}
+
+        dust = self.dust.fluxd(filt, aper)
+        gas = self.gas.fluxd(filt, aper)
+        total = dust + gas
+
+        frac["dust"] = float(dust / total)
+        frac["gas"] = float(gas / total)
+
+        for band in self.gas.bands_in_filter(filt):
+            molecule = band["molecule"]
+            band_name = band["name"]
+            fluxd = self.gas.fluxd(filt, aper, molecule=molecule, band_name=band_name)
+            f = float(fluxd / total)
+            frac[molecule] = frac.get(molecule, {})
+            frac[molecule]["total"] = f + frac[molecule].get("total", 0)
+            frac[molecule][band_name] = f
+
+        return frac
