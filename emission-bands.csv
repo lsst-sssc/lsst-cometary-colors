@@ -1,0 +1,38 @@
+# photons/molecule at 1 au, units: 1/s
+# filter columns are throughputs
+# wave (AA) is approximate since these can be broad features
+molecule,band,gfactor,wave,reference,u,g,r,i,z,y
+
+# NH assuming delta-rh=0
+# Converted from 6e-14 erg/s/molecule, lambda=3358 AA
+NH,(0-0),1.0e-2,3358,Kim et al. (1989),1.0,0,0,0,0,0
+
+# CN... need to look at Schleicher's thesis
+# 4e-13 erg/s/molecule at 3870
+CN,(Delta-nu=0),3870,7.8e-2,Schleicher (1983),1.0,1.0,0,0,0,0
+CN,(2-0),,nan,Fink (1994),0,0,0,1.0,0,0
+CN,(1-0),,nan,Fink (1994),0,0,0,0,1.0,1.0
+
+# 1.0e-12 erg/s/molecule at ~4050
+C3,(4050),4050,0.20,A'Hearn et al. (1985),1.0,1.0,0,0,0,0
+
+C2,(Delta-nu=1),nan,nan,,0,1.0,0,0,0,0
+# 4.5e-13 erg/s/molecule at 5150
+C2,(Delta-nu=0),5150,0.12,A'Hearn (1982),0,1.0,1.0,0,0,0
+C2,(Delta-nu=-1),nan,nan,,0,0,1.0,0,0,0
+
+NH2,(3-0) Sigma, 8159,0.21e-3,Tegler and Wyckoff (1989),0,0,0,1.0,1.0,0
+NH2,(4-0) Pi,    7935,0.24e-3,Tegler and Wyckoff (1989),0,0,0,1.0,1.0,0
+NH2,(5-0) Sigma, 7356,1.33e-3,Tegler and Wyckoff (1989),0,0,0,1.0,0,0
+NH2,(6-0) Pi,    6988,1.84e-3,Tegler and Wyckoff (1989),0,0,1.0,1.0,0,0
+NH2,(7-0) Lambda,7106,1.45e-3,Tegler and Wyckoff (1989),0,0,0,1.0,0,0
+NH2,(7-0) Sigma, 6624,4.07e-3,Tegler and Wyckoff (1989),0,0,1.0,0,0,0
+NH2,(8-0) Pi,    6312,4.95e-3,Tegler and Wyckoff (1989),0,0,1.0,0,0,0
+NH2,(9-0) Sigma, 5982,6.00e-3,Tegler and Wyckoff (1989),0,0,1.0,0,0,0
+NH2,(9-0) Delta, 6060,5.03e-3,Tegler and Wyckoff (1989),0,0,1.0,0,0,0
+NH2,(10-0) Pi,   5704,5.30e-3,Tegler and Wyckoff (1989),0,1.0,1.0,0,0,0
+NH2,(11-0) Sigma,5418,4.17e-3,Tegler and Wyckoff (1989),0,1.0,1.0,0,0,0
+NH2,(12-0) Pi,   5182,2.43e-3,Tegler and Wyckoff (1989),0,1.0,0,0,0,0
+NH2,(13-0) Sigma,4935,1.52e-3,Tegler and Wyckoff (1989),0,1.0,0,0,0,0
+NH2,(14-0) Pi,   4726,0.77e-3,Tegler and Wyckoff (1989),0,1.0,0,0,0,0
+NH2,(15-0) Sigma,4514,0.35e-3,Tegler and Wyckoff (1989),0,1.0,0,0,0,0
