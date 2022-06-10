@@ -2,8 +2,8 @@ import os
 
 import astropy.units as u
 
-@u.quantity_input(fwhm=u.arcsec)
-def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec):
+@u.quantity_input(fwhm=u.arcsec, resolution=u.nm)
+def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec, resolution=1*u.nm):
 
     config_lines = ['<OBJECT>Comet',
                     '<OBJECT-DIAMETER>7.00',
@@ -42,7 +42,6 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
                     '<SURFACE-GAS-RATIO>100',
                     '<SURFACE-GAS-UNIT>afrho',
                     '<SURFACE-MODEL>Lommel-Seeliger,HG1,0.000',
-                    '<GENERATOR-RESOLUTIONKERNEL>N',
                     '<ATMOSPHERE-NMAX>0',
                     '<ATMOSPHERE-LMAX>0',
                     '<ATMOSPHERE-NAERO>0',
@@ -58,11 +57,12 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
                     '<GENERATOR-RANGE1>300',
                     '<GENERATOR-RANGE2>1200',
                     '<GENERATOR-RANGEUNIT>nm',
-                    '<GENERATOR-RESOLUTION>1',
-                    '<GENERATOR-RESOLUTIONUNIT>nm',
+                   f'<GENERATOR-RESOLUTION>{resolution.to(u.nm).value:}',
+                   f'<GENERATOR-RESOLUTIONUNIT>{resolution.to(u.nm).unit:}',
                     '<GENERATOR-RADUNITS>Wm2um',
                    f'<GENERATOR-BEAM>{fwhm.to(u.arcsec).value:}',
                    f'<GENERATOR-BEAM-UNIT>{fwhm.to(u.arcsec).unit:}',
+                    '<GENERATOR-RESOLUTIONKERNEL>N',
                     '<GENERATOR-TELESCOPE>SINGLE',
                     '<GENERATOR-NOISE>NO',
                     '<GENERATOR-TRANS-APPLY>N',

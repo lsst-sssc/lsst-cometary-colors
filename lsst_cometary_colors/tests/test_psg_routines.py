@@ -108,3 +108,24 @@ class TestGenerateConfig(object):
         with pytest.raises(TypeError) as execinfo:
             config_file = generate_psg_config_file(test_dir, fwhm=fwhm)
 
+    def test_resolution_newunits(self, test_dir):
+
+        resolution = 1000*u.AA
+        config_file = generate_psg_config_file(test_dir, resolution=resolution)
+
+        with open(config_file, 'r') as fh:
+            lines = fh.readlines()
+
+        checks = { 'GENERATOR-RESOLUTION' : resolution.to(u.nm).value,
+                   'GENERATOR-RESOLUTIONUNIT' : resolution.to(u.nm).unit
+                 }
+        for key, value in checks.items():
+            line = [line.rstrip() for line in lines if key in line]
+            assert f'<{key:}>{value:}' == line[0]
+
+    def test_resolution_badunits(self, test_dir):
+
+        resolution = 5
+        with pytest.raises(TypeError) as execinfo:
+            config_file = generate_psg_config_file(test_dir, resolution=resolution)
+
