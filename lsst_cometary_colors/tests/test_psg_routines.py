@@ -1,8 +1,12 @@
 import os
 import tempfile, shutil
 import pytest
+import warnings
 
 import astropy.units as u
+warnings.simplefilter("ignore", pytest.PytestUnknownMarkWarning)
+from astropy.tests.helper import assert_quantity_allclose
+from synphot.spectrum import SourceSpectrum
 
 from lsst_cometary_colors.psg_routines import *
 
@@ -146,3 +150,21 @@ class TestGeneratePSGSpectrum:
         assert os.path.exists(spectrum_file) is True
         assert os.path.getsize(spectrum_file) == 2339
 
+class TestReadPSGSpectrum:
+
+    funit = u.W/u.m**2/u.micron
+
+    test_spectrum_fp = os.path.abspath(os.path.join(__package__, 'lsst_cometary_colors', "tests", "data", "psg_spectrum.txt"))
+
+    def test_spectrum_exists(self):
+        assert os.path.exists(self.test_spectrum_fp) is True
+
+    def test_spectrum(self):
+
+        source_spec = read_psg_spectrum(self.test_spectrum_fp)
+
+        assert type(source_spec) == SourceSpectrum
+        assert_quantity_allclose(source_spec.waveset[0], 300 * u.nm)
+        assert_quantity_allclose(source_spec(source_spec.waveset[0], flux_unit='FLAM'), 4.4279706e-16*self.funit)
+        assert_quantity_allclose(source_spec.waveset[-1], 1200 * u.nm)
+        assert_quantity_allclose(source_spec(source_spec.waveset[-1], flux_unit='FLAM'), 4.7801348e-16*self.funit)

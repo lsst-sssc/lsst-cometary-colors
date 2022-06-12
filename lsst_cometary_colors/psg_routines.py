@@ -3,6 +3,7 @@ import requests
 from urllib.parse import quote
 
 import astropy.units as u
+from synphot import SourceSpectrum
 
 @u.quantity_input(fwhm=u.arcsec, resolution=u.nm)
 def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec, resolution=1*u.nm):
@@ -130,3 +131,16 @@ def generate_psg_spectrum(config_file):
         filename = None
 
     return filename
+
+def read_psg_spectrum(spectrum):
+    """Reads a spectrum file produced by PSG from <spectrum> and returns a
+    `synphot.SourceSpectrum`
+    """
+
+    # Units for PSG config files from generate_psg_config_file()
+    # (Could read the units in the PSG header if we wanted to)
+    psg_units = u.W/u.m**2/u.um
+
+    sourcespec = SourceSpectrum.from_file(spectrum, wave_unit=u.nm, flux_unit=psg_units)
+
+    return sourcespec
