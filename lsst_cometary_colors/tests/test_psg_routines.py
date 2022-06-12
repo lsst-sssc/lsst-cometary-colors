@@ -129,3 +129,20 @@ class TestGenerateConfig(object):
         with pytest.raises(TypeError) as execinfo:
             config_file = generate_psg_config_file(test_dir, resolution=resolution)
 
+
+class TestGeneratePSGSpectrum:
+
+    @pytest.fixture(scope='session')
+    def config_file(self, tmp_path_factory):
+        config_path = tmp_path_factory.mktemp('tmp_psg_')
+        config_file = generate_psg_config_file(config_path, resolution=100*u.nm)
+        return config_file
+
+    def test_exists(self, config_file):
+
+        spectrum_file = generate_psg_spectrum(config_file)
+
+        assert os.path.exists(config_file) is True
+        assert os.path.exists(spectrum_file) is True
+        assert os.path.getsize(spectrum_file) == 2339
+

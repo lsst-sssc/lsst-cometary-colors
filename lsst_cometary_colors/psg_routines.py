@@ -1,4 +1,6 @@
 import os
+import requests
+from urllib.parse import quote
 
 import astropy.units as u
 
@@ -13,12 +15,28 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
                     '<OBJECT-STAR-TYPE>G',
                     '<OBJECT-STAR-TEMPERATURE>5777',
                     '<OBJECT-STAR-RADIUS>1.0',
+                    '<OBJECT-PERIAPSIS>0.00',
+                    '<OBJECT-ECCENTRICITY>0.00000',
+                    '<OBJECT-INCLINATION>90.00',
+                    '<OBJECT-OBS-LONGITUDE>0.00',
+                    '<OBJECT-OBS-LATITUDE>0.00',
+                    '<OBJECT-STAR-LONGITUDE>0.00',
+                    '<OBJECT-STAR-LATITUDE>0.00',
+                    '<OBJECT-SEASON>0.00',
                     '<GEOMETRY>Observatory',
                     '<GEOMETRY-OFFSET-NS>0.0',
                     '<GEOMETRY-OFFSET-EW>0.0',
                     '<GEOMETRY-OFFSET-UNIT>arcsec',
                    f'<GEOMETRY-OBS-ALTITUDE>{geo_dist:}',
                     '<GEOMETRY-ALTITUDE-UNIT>AU',
+                    '<GEOMETRY-STAR-DISTANCE>-1.000000e+00',
+                    '<GEOMETRY-SOLAR-ANGLE>48.121',
+                    '<GEOMETRY-OBS-ANGLE>48.121',
+                    '<GEOMETRY-PLANET-FRACTION>1.000e+00',
+                    '<GEOMETRY-BRDFSCALER>0.999',
+                    '<GEOMETRY-AZIMUTH>0.000',
+                    '<GEOMETRY-STAR-FRACTION>0.000000e+00',
+                    '<GEOMETRY-ROTATION>0.00,0.00',
                     '<ATMOSPHERE-STRUCTURE>Coma',
                     '<ATMOSPHERE-PRESSURE>7.5e+27',
                     '<ATMOSPHERE-PUNIT>gas',
@@ -78,5 +96,37 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
 
     with open(filename, 'w') as fh:
         fh.writelines([line + '\n' for line in config_lines])
+
+    return filename
+
+def generate_psg_spectrum(config_file):
+    """Calls the Planetary Spectrum Generator via the API service to compute
+    a radiance spectrum with the configuration from <config_file> and saves it to disk
+    as 'psg_spectrum.txt> in the same directory as the config_file (overwrites any
+    existing version).
+    The path to the spectrum is returned"""
+
+    psg_url = "https://psg.gsfc.nasa.gov/api.php"
+    with open(config_file, 'r') as fh:
+        psg_data = fh.read()
+
+    # URLencode the contents of the PSG config file and then pass the whole thing
+    # as the value for the `file` parameter in the POST
+    payload = quote(psg_data)
+    payload = 'file=' + payload
+
+    # Create output file in the same directory as the config file (Could maybe
+    # make a unique name or pull some of the params out of the config file
+    filename = os.path.join(os.path.dirname(os.path.abspath(config_file)), 'psg_spectrum.txt')
+
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    resp = requests.post(psg_url, stream=True, headers=headers, data=payload)
+    if resp.status_code in [200, 201]:
+        with open(filename, 'wb') as fd:
+            for chunk in resp.iter_content(chunk_size=128):
+                fd.write(chunk)
+    else:
+        print(f"Error retrieving spectrum from PSG. (Status code={resp.status_code:})")
+        filename = None
 
     return filename
