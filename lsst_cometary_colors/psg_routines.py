@@ -6,7 +6,20 @@ import astropy.units as u
 from synphot import SourceSpectrum
 
 @u.quantity_input(fwhm=u.arcsec, resolution=u.nm)
-def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec, resolution=1*u.nm):
+def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec, resolution=1*u.nm, afrho=100, activity=7.5e27):
+    """Generates a comet configuration file in <output_location> for the
+    NASA Planetary Spectrum Generator (PSG) which can be uploaded or submitted
+    via the API (see `generate_psg_spectrum()`).
+    The optional configurable parameters are:
+    * helio_dist: heliocentric distance of comet from the Sun (au),
+    * geo_dist: geocentric distance of comet from the Earth (au),
+    * fwhm: the FWHM of the instrument FOV (Astropy Quantity, transformable to arcsec),
+    * resolution: the resolution of the generated spectrum (covers 300-1200nm; Astropy Quantity, transformable to nm),
+    * afrho: Afrho (cm; used as unit of dust abundance for PSG),
+    * activity: Atmospheric activity (molecules/sec)
+
+    The pathname of the config file is returned.
+    """
 
     config_lines = ['<OBJECT>Comet',
                     '<OBJECT-DIAMETER>7.00',
@@ -39,7 +52,7 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
                     '<GEOMETRY-STAR-FRACTION>0.000000e+00',
                     '<GEOMETRY-ROTATION>0.00,0.00',
                     '<ATMOSPHERE-STRUCTURE>Coma',
-                    '<ATMOSPHERE-PRESSURE>7.5e+27',
+                   f'<ATMOSPHERE-PRESSURE>{activity:}',
                     '<ATMOSPHERE-PUNIT>gas',
                     '<ATMOSPHERE-TEMPERATURE>38.1',
                     '<ATMOSPHERE-WEIGHT>471.57',
@@ -58,7 +71,7 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
                     '<SURFACE-ABUN>',
                     '<SURFACE-UNIT>',
                     '<SURFACE-THICK>',
-                    '<SURFACE-GAS-RATIO>100',
+                   f'<SURFACE-GAS-RATIO>{afrho:}',
                     '<SURFACE-GAS-UNIT>afrho',
                     '<SURFACE-MODEL>Lommel-Seeliger,HG1,0.000',
                     '<ATMOSPHERE-NMAX>0',
@@ -103,7 +116,7 @@ def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.973
 def generate_psg_spectrum(config_file):
     """Calls the Planetary Spectrum Generator via the API service to compute
     a radiance spectrum with the configuration from <config_file> and saves it to disk
-    as 'psg_spectrum.txt> in the same directory as the config_file (overwrites any
+    as 'psg_spectrum.txt' in the same directory as the config_file (overwrites any
     existing version).
     The path to the spectrum is returned"""
 

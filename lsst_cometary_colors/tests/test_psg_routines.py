@@ -133,6 +133,35 @@ class TestGenerateConfig(object):
         with pytest.raises(TypeError) as execinfo:
             config_file = generate_psg_config_file(test_dir, resolution=resolution)
 
+    def test_afrho(self, test_dir):
+
+        afrho = 2700
+        config_file = generate_psg_config_file(test_dir, afrho=afrho)
+
+        with open(config_file, 'r') as fh:
+            lines = fh.readlines()
+
+        checks = { 'SURFACE-GAS-RATIO' : afrho,
+                   'SURFACE-GAS-UNIT' : 'afrho'
+                 }
+        for key, value in checks.items():
+            line = [line.rstrip() for line in lines if key in line]
+            assert f'<{key:}>{value:}' == line[0]
+
+    def test_activity(self, test_dir):
+
+        Q = 1e27
+        config_file = generate_psg_config_file(test_dir, activity=Q)
+
+        with open(config_file, 'r') as fh:
+            lines = fh.readlines()
+
+        checks = { 'ATMOSPHERE-PRESSURE' : Q,
+                 }
+        for key, value in checks.items():
+            line = [line.rstrip() for line in lines if key in line]
+            assert f'<{key:}>{value:}' == line[0]
+
 
 class TestGeneratePSGSpectrum:
 
