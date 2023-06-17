@@ -6,11 +6,12 @@ from sbpy.data import Ephem
 from sbpy.calib import solar_fluxd
 from sbpy.spectroscopy import SpectralGradient
 import sbpy.units as sbu
-from . import Gas, Dust, Comet, bandwidth, lambda_eff
+from .. import Gas, Dust, Comet, bandwidth, lambda_eff
 
 
 def test_no_gas():
-    eph = Ephem.from_dict({"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
+    eph = Ephem.from_dict(
+        {"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
     comet = Comet(eph, 1000 * u.cm, QCN_afrho=0 / u.s / u.cm)
     rho = 1e4 * u.km
 
@@ -23,7 +24,8 @@ def test_no_gas():
 
 
 def test_gas_emits_photons():
-    eph = Ephem.from_dict({"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
+    eph = Ephem.from_dict(
+        {"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
     comet = Comet(eph, 1000 * u.cm, QCN_afrho=0 / u.s / u.cm)
     rho = 1e4 * u.km
 
@@ -34,7 +36,8 @@ def test_gas_emits_photons():
 
 
 def test_spectral_reddening():
-    eph = Ephem.from_dict({"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
+    eph = Ephem.from_dict(
+        {"rh": 2 * u.au, "delta": 1 * u.au, "phase": 0 * u.deg})
     comet = Comet(eph, 1000 * u.cm, QCN_afrho=0 / u.s / u.cm)
     rho = 1e4 * u.km
     u_r = (
