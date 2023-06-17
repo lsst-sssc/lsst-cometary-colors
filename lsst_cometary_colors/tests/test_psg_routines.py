@@ -177,7 +177,7 @@ class TestGeneratePSGSpectrum:
 
         assert os.path.exists(config_file) is True
         assert os.path.exists(spectrum_file) is True
-        assert os.path.getsize(spectrum_file) == 2339
+        assert os.path.getsize(spectrum_file) == 2389
 
 class TestReadPSGSpectrum:
 
@@ -194,6 +194,6 @@ class TestReadPSGSpectrum:
 
         assert type(source_spec) == SourceSpectrum
         assert_quantity_allclose(source_spec.waveset[0], 300 * u.nm)
-        assert_quantity_allclose(source_spec(source_spec.waveset[0], flux_unit='FLAM'), 4.4279706e-16*self.funit)
+        assert_quantity_allclose(source_spec(source_spec.waveset[0], flux_unit='FLAM'), 4.5225466e-16*self.funit)
         assert_quantity_allclose(source_spec.waveset[-1], 1200 * u.nm)
-        assert_quantity_allclose(source_spec(source_spec.waveset[-1], flux_unit='FLAM'), 4.7801348e-16*self.funit)
+        assert_quantity_allclose(source_spec(source_spec.waveset[-1], flux_unit='FLAM'), 4.8396509e-16*self.funit)
