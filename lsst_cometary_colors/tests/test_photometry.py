@@ -6,7 +6,7 @@ from sbpy.data import Ephem
 from sbpy.calib import solar_fluxd
 from sbpy.spectroscopy import SpectralGradient
 import sbpy.units as sbu
-from .. import Gas, Dust, Comet, bandwidth, lambda_eff
+from lsst_cometary_colors import Gas, Dust, Comet, bandwidth, lambda_eff
 
 
 def test_no_gas():
