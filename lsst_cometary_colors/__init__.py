@@ -30,7 +30,10 @@ lambda_0 = {  # mean energy wavelength
 }
 
 # effective wavelength for LSST filters already built-into sbpy
-lambda_eff = {filt: solar_fluxd.get()[f"LSST {filt}(lambda eff)"] for filt in "ugrizy"}
+lambda_eff = {
+    filt: solar_fluxd.get()[f"LSST {filt}(lambda eff)"]
+    for filt in "ugrizy"
+}
 
 
 class Coma:
@@ -139,7 +142,8 @@ class Gas(Coma):
         for band in self.bands_in_filter(filt, molecule=molecule, band_name=band_name):
             haser = self.haser[band["molecule"]]
             N = haser.total_number(aper)
-            flux = (N * band["gfactor"] * const.h * const.c / band["wave"]).to("W")
+            flux = (N * band["gfactor"] * const.h *
+                    const.c / band["wave"]).to("W")
             fluxd = (flux * band["wave"] / lambda_0[filt] / bandwidth[filt] / A).to(
                 "W/(m2 um)"
             )
@@ -235,7 +239,7 @@ class Comet:
 
     QCN_afrho : astropy Quantity
         Ratio of CN production rate to Afρ value.  Default is from A'Hearn et al.
-        (1995):  CN / OH * OH / Afρ  = 10**(-2.50 + 25.82) = 2.1e23 cm / s.
+        (1995):  CN / OH * OH / Afρ  = 10**(-2.50 + 25.82) = 2.1e23 / cm s.
 
     **gas_ratios :
         Additional keyword arguments are passed to ``Gas()``, e.g., NH_CN, C3_CN,
@@ -313,7 +317,8 @@ class Comet:
         for band in self.gas.bands_in_filter(filt):
             molecule = band["molecule"]
             band_name = band["name"]
-            fluxd = self.gas.fluxd(filt, aper, molecule=molecule, band_name=band_name)
+            fluxd = self.gas.fluxd(
+                filt, aper, molecule=molecule, band_name=band_name)
             f = float(fluxd / total)
             frac[molecule] = frac.get(molecule, {})
             frac[molecule]["total"] = f + frac[molecule].get("total", 0)
