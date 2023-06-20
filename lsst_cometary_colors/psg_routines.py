@@ -3,6 +3,7 @@ import requests
 from urllib.parse import quote
 
 import astropy.units as u
+from astropy.table import QTable, Table
 from synphot import SourceSpectrum
 
 @u.quantity_input(fwhm=u.arcsec, resolution=u.nm)
@@ -145,15 +146,26 @@ def generate_psg_spectrum(config_file):
 
     return filename
 
-def read_psg_spectrum(spectrum):
+def read_psg_spectrum(spectrum, table=False):
     """Reads a spectrum file produced by PSG from <spectrum> and returns a
-    `synphot.SourceSpectrum`
+    `synphot.SourceSpectrum`. If [table] is True, returns an AstroPy Table
+    version of the file as well.
     """
 
+    spectrum_table = None
     # Units for PSG config files from generate_psg_config_file()
     # (Could read the units in the PSG header if we wanted to)
+    wave_units = u.nm
     psg_units = u.W/u.m**2/u.um
 
     sourcespec = SourceSpectrum.from_file(spectrum, wave_unit=u.nm, flux_unit=psg_units)
-
-    return sourcespec
+    if table is True:
+        spectrum_table = QTable.read(spectrum, format='ascii.commented_header', header_start=18)
+        for column in spectrum_table.colnames:
+            col_unit = psg_units
+            if column == 'Wave/freq':
+                col_unit = wave_units
+            spectrum_table[column].unit = col_unit
+        return sourcespec, spectrum_table
+    else:
+        return sourcespec
