@@ -175,8 +175,10 @@ def read_psg_spectrum(spectrum, table=False, column=None):
                 col_unit = wave_units
             spectrum_table[tab_column].unit = col_unit
         if column is not None:
-            sourcespec = SourceSpectrum(Empirical1D, points=spectrum_table['Wave/freq'], lookup_table=spectrum_table[column])
-            sourcespec.meta['read_column'] = column_name
+            sourcespec = None
+            if column != 'Wave/freq' and column in spectrum_table.colnames:
+                sourcespec = SourceSpectrum(Empirical1D, points=spectrum_table['Wave/freq'], lookup_table=spectrum_table[column])
+                sourcespec.meta['read_column'] = column_name
         return sourcespec, spectrum_table
     else:
         return sourcespec

@@ -226,3 +226,21 @@ class TestReadPSGSpectrum:
         assert_quantity_allclose(source_spec(source_spec.waveset[0], flux_unit='FLAM'), 0e0*self.funit)
         assert_quantity_allclose(source_spec.waveset[-1], 1200 * u.nm)
         assert_quantity_allclose(source_spec(source_spec.waveset[-1], flux_unit='FLAM'), 2.42502e-25*self.funit)
+
+    def test_spectrum_bad_column(self):
+
+        expected_colnames = ['Wave/freq', 'Total', 'Comet', 'Nucleus', 'Dust', 'OH', 'CN', 'C2', 'NH']
+        source_spec, table = read_psg_spectrum(self.test_spectrum_fp, column='wibble')
+
+        assert source_spec == None
+        assert type(table) == QTable
+        assert table.colnames == expected_colnames
+
+    def test_spectrum_wave_column(self):
+
+        expected_colnames = ['Wave/freq', 'Total', 'Comet', 'Nucleus', 'Dust', 'OH', 'CN', 'C2', 'NH']
+        source_spec, table = read_psg_spectrum(self.test_spectrum_fp, column='Wave/freq')
+
+        assert source_spec == None
+        assert type(table) == QTable
+        assert table.colnames == expected_colnames
