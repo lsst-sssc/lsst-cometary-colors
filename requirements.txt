@@ -1,3 +1,5 @@
 pytest
 astropy
+synphot
+requests
 -e git+https://git@github.com/NASA-Planetary-Science/sbpy.git#egg=sbpy
