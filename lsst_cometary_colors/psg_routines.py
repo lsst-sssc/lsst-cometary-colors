@@ -3,7 +3,9 @@ import requests
 from urllib.parse import quote
 
 import astropy.units as u
+from astropy.table import QTable, Table
 from synphot import SourceSpectrum
+from synphot.models import Empirical1D
 
 @u.quantity_input(fwhm=u.arcsec, resolution=u.nm)
 def generate_psg_config_file(output_location, helio_dist=2.87796, geo_dist=2.9737, fwhm=4*u.arcsec, resolution=1*u.nm, afrho=100, activity=7.5e27):
@@ -145,15 +147,38 @@ def generate_psg_spectrum(config_file):
 
     return filename
 
-def read_psg_spectrum(spectrum):
+def read_psg_spectrum(spectrum, table=False, column=None):
     """Reads a spectrum file produced by PSG from <spectrum> and returns a
-    `synphot.SourceSpectrum`
+    `synphot.SourceSpectrum`. If [table] is True, returns an AstroPy Table
+    version of the file as well. If [column] is specified and is one of the
+    columns in the Table, then that column is used for the sourcespec fluxes
     """
 
+    spectrum_table = None
     # Units for PSG config files from generate_psg_config_file()
     # (Could read the units in the PSG header if we wanted to)
+    wave_units = u.nm
     psg_units = u.W/u.m**2/u.um
 
     sourcespec = SourceSpectrum.from_file(spectrum, wave_unit=u.nm, flux_unit=psg_units)
-
-    return sourcespec
+    if column is not None:
+         table = True
+         column_name = column
+    else:
+        column_name = 'Total (default)'
+    sourcespec.meta['read_column'] = column_name
+    if table is True:
+        spectrum_table = QTable.read(spectrum, format='ascii.commented_header', header_start=18)
+        for tab_column in spectrum_table.colnames:
+            col_unit = psg_units
+            if tab_column == 'Wave/freq':
+                col_unit = wave_units
+            spectrum_table[tab_column].unit = col_unit
+        if column is not None:
+            sourcespec = None
+            if column != 'Wave/freq' and column in spectrum_table.colnames:
+                sourcespec = SourceSpectrum(Empirical1D, points=spectrum_table['Wave/freq'], lookup_table=spectrum_table[column])
+                sourcespec.meta['read_column'] = column_name
+        return sourcespec, spectrum_table
+    else:
+        return sourcespec
